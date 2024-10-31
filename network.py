@@ -35,3 +35,4 @@ class Network:
 
     def hoshen_kopelman(self):
         print('nothing here yet')
+        print('still not')
