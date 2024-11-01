@@ -21,13 +21,18 @@ class Network:
 
     def __solve_label_conflict(self, conflicted_label):
 
+            # TODO: make method more efficient
+
             m = self.N[conflicted_label]
-            while True:
-                r = -m
-                m = self.N[r]
-                if m > 0:
-                    break
-            return r
+            if m < 0:
+                while True:
+                    r = -m
+                    m = self.N[r]
+                    if m >= 0:
+                        break
+                return r
+            else:
+                return conflicted_label
 
     def draw_raw_network(self, name):
 
@@ -99,11 +104,10 @@ class Network:
                     elif tile_left == 0 and tile_above == 1:
                         if self.N[label_above] < 0:
                             resolved_label = self.__solve_label_conflict(label_above)
-                           # self.N[label_above] = -resolved_label
-
-                            self.labeled_network[row - 1][col] = resolved_label
                             labeled_row.append(resolved_label)
+                            labeled_row[col-1] = resolved_label
                             self.N[resolved_label] += 1
+
                         else:
                             labeled_row.append(label_above)
                             self.N[label_above] += 1
@@ -113,7 +117,6 @@ class Network:
 
                         if self.N[label_left] < 0:
                             resolved_label = self.__solve_label_conflict(label_left)
-                           # self.N[label_left] = -resolved_label
                             labeled_row.append(resolved_label)
                             labeled_row[col-1] = resolved_label
                             self.N[resolved_label] += 1
@@ -122,35 +125,31 @@ class Network:
                             self.N[label_left] += 1
 
                     elif tile_left == 1 and tile_above == 1:
-                        if label_above < label_left:
-                            if self.N[label_above] < 0:
 
-                                resolved_label = self.__solve_label_conflict(label_above)
-                                #self.N[label_above] = -resolved_label
-                                self.labeled_network[row - 1][col] = resolved_label
-                                labeled_row[-1] = resolved_label
-                                labeled_row.append(resolved_label)
-                                self.N[resolved_label] += 1
-                            else:
-                                labeled_row[col - 1] = label_above
-                                labeled_row.append(label_above)
-                                s = self.N[label_left]
-                                self.N[label_above] = self.N[label_above] + (1 + s)
-                                self.N[label_left] = - label_above
+                        resolved_label_left = label_left if self.N[label_left] > 0 else self.__solve_label_conflict(label_left)
+                        resolved_label_above = label_above if self.N[label_above] > 0 else self.__solve_label_conflict(label_above)
+
+                        if resolved_label_above < resolved_label_left:
+
+                            labeled_row.append(resolved_label_above)
+
+                            labeled_row[col-1] = resolved_label_left
+                            self.labeled_network[row-1][col] = resolved_label_above
+
+                            self.N[resolved_label_above] += 1
+                            self.N[resolved_label_above] += self.N[resolved_label_left]
+                            self.N[resolved_label_left] = - resolved_label_above
 
                         elif label_above > label_left:
-                            if self.N[label_left] < 0:
-                                resolved_label = self.__solve_label_conflict(label_left)
-                               # self.N[label_left] = -resolved_label
-                                labeled_row.append(resolved_label)
-                                labeled_row[col - 1] = resolved_label
-                                self.N[resolved_label] += 1
-                            else:
-                                labeled_row.append(label_left)
-                                self.labeled_network[row - 1][col] = label_left
-                                s = self.N[label_above]
-                                self.N[label_left] = self.N[label_left] + (1 + s)
-                                self.N[label_above] = - label_left
+
+                            labeled_row.append(resolved_label_left)
+
+                            labeled_row[col-1] = resolved_label_left
+                            self.labeled_network[row-1][col] = resolved_label_above
+
+                            self.N[resolved_label_left] += 1
+                            self.N[resolved_label_left] += self.N[resolved_label_above]
+                            self.N[resolved_label_above] = - resolved_label_left
 
                         elif label_above == label_left:
                             labeled_row.append(label_left)
