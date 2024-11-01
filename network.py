@@ -44,6 +44,20 @@ class Network:
 
         else:
             print(self.labeled_network)
+            print('\n')
+            print(self.N)
+            quantity_measured = 0
+            for i in self.N:
+                if i > 0:
+                    quantity_measured += i
+
+            quantity_set = 0
+            for row in range(self.height):
+                for col in range(self.width):
+                    if self.network[row][col] != 0:
+                        quantity_set += 1
+
+            print('\n'+str(quantity_measured - quantity_set))
             fig, ax = plt.subplots()
             ax.matshow(self.labeled_network, cmap=cmap, interpolation='none')
 
@@ -84,8 +98,9 @@ class Network:
                     elif tile_left == 0 and tile_above == 1:
                         if self.N[label_above] < 0:
                             resolved_label = self.__solve_label_conflict(label_above)
-                            self.N[label_above] = -resolved_label
-                            self.labeled_network[row -1 ][col] = resolved_label
+                           # self.N[label_above] = -resolved_label
+
+                            self.labeled_network[row - 1][col] = resolved_label
                             labeled_row.append(resolved_label)
                             self.N[resolved_label] += 1
                         else:
@@ -97,7 +112,7 @@ class Network:
 
                         if self.N[label_left] < 0:
                             resolved_label = self.__solve_label_conflict(label_left)
-                            self.N[label_left] = -resolved_label
+                           # self.N[label_left] = -resolved_label
                             labeled_row.append(resolved_label)
                             labeled_row[col-1] = resolved_label
                             self.N[resolved_label] += 1
@@ -108,9 +123,11 @@ class Network:
                     elif tile_left == 1 and tile_above == 1:
                         if label_above < label_left:
                             if self.N[label_above] < 0:
+
                                 resolved_label = self.__solve_label_conflict(label_above)
-                                self.N[label_above] = -resolved_label
+                                #self.N[label_above] = -resolved_label
                                 self.labeled_network[row - 1][col] = resolved_label
+                                labeled_row[-1] = resolved_label
                                 labeled_row.append(resolved_label)
                                 self.N[resolved_label] += 1
                             else:
@@ -123,7 +140,7 @@ class Network:
                         elif label_above > label_left:
                             if self.N[label_left] < 0:
                                 resolved_label = self.__solve_label_conflict(label_left)
-                                self.N[label_left] = -resolved_label
+                               # self.N[label_left] = -resolved_label
                                 labeled_row.append(resolved_label)
                                 labeled_row[col - 1] = resolved_label
                                 self.N[resolved_label] += 1
