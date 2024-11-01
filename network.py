@@ -90,6 +90,7 @@ class Network:
                     label_above = self.width * self.height if row < 1 else self.labeled_network[row - 1][col]
                     label_left = self.width * self.height if col < 1 else labeled_row[col-1]
 
+
                     if tile_left == 0 and tile_above == 0:
                         labeled_row.append(max_label)
                         max_label += 1
