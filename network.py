@@ -110,3 +110,5 @@ class Network:
             # end col loop
         # end row loop                    
 
+    def cluster_sizes(self):
+        return dict(zip(*np.unique(np.where(self.N > 0,  self.N, np.zeros(len(self.N))), return_counts=True)))
