@@ -38,6 +38,14 @@ class Network:
         return r
 
     def plot_grid(self, fig=None, ax=None, labeled=False, file_name=None, network=None):
+        """
+        Plots a given 2d matrix with true, false values
+        :param fig: fig to create axis from (created by default)
+        :param ax: axis to plot on (created by default)
+        :param labeled: if labels should be drawn on each occupied cell
+        :param file_name: file name to save the plot to (default: None)
+        :param network: network to plot (default self.network)
+        """
         if not self.analysed: self.hoshen_kopelman()
         if ax is None:
             if fig is None:
@@ -55,6 +63,14 @@ class Network:
             plt.savefig(f'out/{file_name}.png')
 
     def plot_cluster(self, cluster_label, fig=None, ax=None, labeled=False, file_name=None):
+        """
+        Plots a cluster of this network
+        :param cluster_label: label of cluster to plot
+        :param fig: fig to create axis from (created by default)
+        :param ax: axis to plot on (created by default)
+        :param labeled: if labels should be drawn on each occupied cell
+        :param file_name: file name to save the plot to (default: None)
+        """
         self.fix_labels()
         n = np.copy(self.labeled_network) # copy to not modify this network
         n[n != cluster_label] = 0      # set all wich are not the cluster to 0
@@ -68,6 +84,7 @@ class Network:
     def is_occupied(self, row, col):
         return self.network[row+1][col+1]
 
+    # retrieves and fixes a label at a position
     def label_at(self, row, col):
         l = self.labeled_network[row][col]
         if self.fixed: return l
@@ -80,6 +97,7 @@ class Network:
             self.labeled_network[row][col] = l
         return l
 
+    # fixes all labels in the network
     def fix_labels(self):
         if not self.analysed: self.hoshen_kopelman()
         if self.fixed: return
@@ -87,6 +105,7 @@ class Network:
             self.label_at(i, j)
         self.fixed = True
 
+    # calculates cluster which perculate
     def get_perculations(self):
         """
         :return: an array of labels which perculate (touch top and bottom) except 0
