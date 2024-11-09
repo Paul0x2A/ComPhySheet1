@@ -28,7 +28,7 @@ class Network:
 
     # does not fix labels in the network!
     def __resolve_label(self, conflicted_label):
-        # TODO: make method more efficient
+
         r = conflicted_label
         m = self.N[conflicted_label]
         if m < 0:
@@ -158,10 +158,6 @@ class Network:
                         label = resolved_label_left if resolved_label_left < resolved_label_above else resolved_label_above
                         other_label = resolved_label_left if resolved_label_left > resolved_label_above else resolved_label_above
 
-                        #labeled_row[col-1] = resolved_label_left
-                        #self.labeled_network[row-1][col] = resolved_label_above
-                        #self.labeled_network[row-2][col-1] = label
-                        #self.labeled_network[row-1][col-2] = label
                         self.labeled_network[row-1][col-1] = label
                         self.N[label] += 1
                         self.N[label] += self.N[other_label]
@@ -173,4 +169,16 @@ class Network:
     def cluster_sizes(self):
         return dict(zip(*np.unique(np.where(self.N > 0,  self.N, np.zeros(len(self.N))), return_counts=True)))
 
+    # calculates the average cluster size of the analyzed network
+    def average_cluster_size(self):
 
+        if not self.analysed: self.hoshen_kopelman()    # check that network is analyzed
+        first_moment = 0
+        second_moment = 0
+        cluster_sizes = self.cluster_sizes()
+        for s in cluster_sizes:
+            n_s = s * cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
+            first_moment += s * n_s
+            second_moment += (s ** 2) * n_s
+
+        return second_moment / first_moment
