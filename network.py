@@ -120,6 +120,9 @@ class Network:
         perc = np.intersect1d(top, bot)
         return perc[perc != 0]
 
+    def is_perculating(self):
+        return len(self.get_perculations()) > 0
+
     def hoshen_kopelman(self):
         if self.analysed: return
         self.analysed = True
