@@ -1,6 +1,5 @@
 import random
 from netrc import netrc
-
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
@@ -97,6 +96,46 @@ class Network:
             self.labeled_network[row][col] = l
         return l
 
+
+    # calculates the mean radius of gyration over all clusters of size s
+    def r_s_squared(self, s):
+
+        # for clusters of size 0 or 1 return 0
+        if s <= 1.0:
+            return 0
+
+        self.fix_labels()
+        labels = np.where(self.N == s)[0]
+
+        # check existence of sufficient labels
+        if len(labels) == 0:
+            return 0
+
+        r_squared = 0
+
+        # loop over all clusters of size s
+        for label in labels:
+
+            n = np.copy(self.labeled_network)   # copy to not modify this network
+            n[n != label] = 0                   # set all wich are not the cluster to 0
+            n = n[~np.all(n == 0, axis=1)]      # delete columns with 0
+            n = n[:, ~np.all(n == 0, axis=0)]   # delete rows with 0
+
+            # loop over all coordinate-combinations
+            for i in range(len(n)):
+                for j in range(len(n[i])):
+                    if n[i][j] != 0:
+                        for k in range(len(n)):
+                            for l in range(len(n[i])):
+                                if n[k][l] != 0:
+                                    r_squared += ((i - k)**2 + (j - l)**2)
+
+        r_squared /= (2 * s * s)    # factor 2 takes care of redundant term in the sum
+        r_squared /= len(labels)    # normalize by the number of investigated clusters
+        return r_squared
+
+
+
     # fixes all labels in the network
     def fix_labels(self):
         if not self.analysed: self.hoshen_kopelman()
@@ -180,8 +219,21 @@ class Network:
         second_moment = 0
         cluster_sizes = self.cluster_sizes()
         for s in cluster_sizes:
-            n_s = s * cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
+            n_s = cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
             first_moment += s * n_s
             second_moment += (s ** 2) * n_s
 
-        return second_moment / first_moment
+        return 0 if first_moment == 0 else second_moment / first_moment
+
+    # calculates the correlation length of the analyzed network
+    def correlation_length(self):
+        if not self.analysed: self.hoshen_kopelman()    # check that network is analyzed
+        avg_square_distance = 0
+        second_moment = 0
+        cluster_sizes = self.cluster_sizes()
+        for s in cluster_sizes:
+            n_s = cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
+            avg_square_distance += 2 * self.r_s_squared(s) * n_s * (s ** 2)
+            second_moment += (s ** 2) * n_s
+
+        return 0 if second_moment == 0 else np.sqrt(avg_square_distance / second_moment)
