@@ -14,7 +14,7 @@ def calc_pc_once(L, min_p, step):
     while True:
         n = network.Network(int(L), int(L), p)
         n.hoshen_kopelman()
-        if n.is_perculating():
+        if n.is_percolating():
             if p < min_p + step:
                 global a
                 a += 1
