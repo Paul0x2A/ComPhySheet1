@@ -5,9 +5,24 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 
+from numba import int32, uint32, float32, bool
+from numba.experimental import jitclass
+
 cmap = ListedColormap([[34, 34, 34], [224, 224, 224]])
 
+# jitclass annotation to tell numba to compile this class
+@jitclass()
 class Network:
+
+    # declare class member type, this is required for numba
+    height: int32
+    width: int32
+    probability: float32
+    analysed: bool
+    fixed: bool
+    network: bool[:,:] # 2D bool array
+    labeled_network: uint32[:,:] # 2D uint32 array
+    N: int32[:] # 1D int32 array
 
     # if save is true, plots will be exported. Not useful for jupyter
     def __init__(self, height, width, probability):
