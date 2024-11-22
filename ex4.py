@@ -4,11 +4,11 @@ import ex2b
 import matplotlib.pyplot as plt
 from scipy import stats
 
-L = 100  # size of simulated networks
-num = 1000  # number of tested probabilities
-p_c = 0.599   # see ex 2
+L = 4000  # size of simulated networks
+num = 100  # number of tested probabilities
+p_c = 0.594   # see ex 2
 
-p_arr = np.linspace(0, p_c, num)    # array of simulated probabilities
+p_arr = np.linspace(0.4, p_c, num)    # array of simulated probabilities
 ln_S = []
 ln_dp = []
 j = 0
@@ -25,7 +25,7 @@ for p in p_arr:
     dp = abs(p - p_c)
 
     # exclude percolating systems (condition p < p_c) and special cases
-    if dp > 0 and 0 < S < p_c * L * L and not net.is_perculating() :
+    if dp > 0 and 0 < S and not net.is_perculating() :
         ln_S.append(np.log(S))
         ln_dp.append(np.log(dp))
 
@@ -44,4 +44,4 @@ plt.legend()
 plt.grid()
 plt.xlabel('ln(|$p-p_c$|)')
 plt.ylabel('ln($S$)')
-plt.savefig('testex4-1')
+plt.savefig('testex4-4')

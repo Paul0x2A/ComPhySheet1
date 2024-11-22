@@ -1,10 +1,9 @@
 import numpy as np
 import network
-import ex2b
 import matplotlib.pyplot as plt
 from scipy import stats
 
-L = 1000  # size of simulated networks
+L = 500  # size of simulated networks
 num = 100  # number of tested probabilities
 p_c = 0.593   # see ex 2
 
@@ -34,12 +33,12 @@ for p in p_arr:
 ln_dp_interpolate = np.linspace(ln_dp[0], ln_dp[-1], num)
 plt.scatter(ln_dp, ln_zeta, s=4, c='r', label='Simulation')
 res = stats.linregress(ln_dp, ln_zeta)
-plt.plot(ln_dp_interpolate, ln_dp_interpolate * res.slope + res.intercept, label='ln($\zeta$) = ('
+plt.plot(ln_dp_interpolate, ln_dp_interpolate * res.slope + res.intercept, label=r'ln($\xi$) = ('
         +str(round(res.slope, 2))+'$ \pm '+str(round(res.stderr, 2))+') \cdot \ln(|p-p_c|) + $('
         +str(round(res.intercept, 2))+' $\pm $'+str(round(res.intercept_stderr, 2))+')', linewidth=2, color='black')
 
 plt.legend()
 plt.grid()
 plt.xlabel('ln(|$p-p_c$|)')
-plt.ylabel('ln($\zeta$)')
+plt.ylabel(r'ln($\xi$)')
 plt.savefig('testex5')
