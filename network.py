@@ -219,7 +219,7 @@ class Network:
         second_moment = 0
         cluster_sizes = self.cluster_sizes()
         for s in cluster_sizes:
-            n_s = cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
+            n_s = s * cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
             first_moment += s * n_s
             second_moment += (s ** 2) * n_s
 
@@ -232,8 +232,9 @@ class Network:
         second_moment = 0
         cluster_sizes = self.cluster_sizes()
         for s in cluster_sizes:
-            n_s = cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
+            n_s = s * cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
             avg_square_distance += 2 * self.r_s_squared(s) * n_s * (s ** 2)
             second_moment += (s ** 2) * n_s
 
         return 0 if second_moment == 0 else np.sqrt(avg_square_distance / second_moment)
+

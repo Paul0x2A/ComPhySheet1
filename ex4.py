@@ -1,12 +1,11 @@
 import numpy as np
 import network
-import ex2b
 import matplotlib.pyplot as plt
 from scipy import stats
 
-L = 100  # size of simulated networks
+L = 4000  # size of simulated networks
 num = 1000  # number of tested probabilities
-p_c = 0.599   # see ex 2
+p_c = 0.592   # see ex 2
 
 p_arr = np.linspace(0, p_c, num)    # array of simulated probabilities
 ln_S = []
@@ -44,4 +43,4 @@ plt.legend()
 plt.grid()
 plt.xlabel('ln(|$p-p_c$|)')
 plt.ylabel('ln($S$)')
-plt.savefig('testex4-1')
+plt.savefig('testex4-6')

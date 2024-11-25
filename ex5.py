@@ -1,6 +1,5 @@
 import numpy as np
 import network
-import ex2b
 import matplotlib.pyplot as plt
 from scipy import stats
 
