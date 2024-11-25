@@ -193,7 +193,6 @@ def create(L, p):
     n.hoshen_kopelman()
     return n
 
-
 #@jit(Network.class_type.instance_type(int32, float32))
 def create_percolating(L, p):
     n = Network(L, L, p)
