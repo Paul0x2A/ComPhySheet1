@@ -4,9 +4,24 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 
+from numba import int32, uint32, float32, bool
+from numba.experimental import jitclass
+
 cmap = ListedColormap([[34, 34, 34], [224, 224, 224]])
 
+# jitclass annotation to tell numba to compile this class
+@jitclass()
 class Network:
+
+    # declare class member type, this is required for numba
+    height: int32
+    width: int32
+    probability: float32
+    analysed: bool
+    fixed: bool
+    network: bool[:,:] # 2D bool array
+    labeled_network: uint32[:,:] # 2D uint32 array
+    N: int32[:] # 1D int32 array
 
     # if save is true, plots will be exported. Not useful for jupyter
     def __init__(self, height, width, probability):
@@ -22,7 +37,7 @@ class Network:
         # Matrix with cluster labels, 0 is none
         self.labeled_network = np.zeros((height, width), dtype=np.uint32)   # Labeled network contains cluster names. Needs to be corrected for unions by the cluster-vector
         # Map of cluster label to cluster size, negative size links to another cluster, height*width/2 is max cluster amount (checkerboard pattern)
-        self.N = np.zeros(int(np.ceil(height*width/2)), dtype=np.int32)                # Cluster-Vector containing cluster-sizes. Negative values represent new cluster-names after a union
+        self.N = np.zeros(int(np.ceil(height*width/2))+1, dtype=np.int32)                # Cluster-Vector containing cluster-sizes. Negative values represent new cluster-names after a union
         #print(self.network)
 
     # does not fix labels in the network!
@@ -82,6 +97,9 @@ class Network:
 
     def is_occupied(self, row, col):
         return self.network[row+1][col+1]
+
+    def get_total_occupied_spots(self):
+        return self.network.sum()
 
     # retrieves and fixes a label at a position
     def label_at(self, row, col):
@@ -144,10 +162,10 @@ class Network:
             self.label_at(i, j)
         self.fixed = True
 
-    # calculates cluster which perculate
-    def get_perculations(self):
+    # calculates cluster which percolate
+    def get_percolations(self):
         """
-        :return: an array of labels which perculate (touch top and bottom) except 0
+        :return: an array of labels which percolate (touch top and bottom) except 0
         """
         if not self.analysed: self.hoshen_kopelman()
         top = self.labeled_network[0]
@@ -159,8 +177,13 @@ class Network:
         perc = np.intersect1d(top, bot)
         return perc[perc != 0]
 
-    def is_perculating(self):
-        return len(self.get_perculations()) > 0
+    def get_largest_percolating_cluster(self):
+        perc = self.get_percolations()
+        if perc.size == 0: return 0
+        return np.argmax(self.N[perc]) if len(perc) > 1 else perc[0]
+
+    def is_percolating(self):
+        return len(self.get_percolations()) > 0
 
     def hoshen_kopelman(self):
         if self.analysed: return
