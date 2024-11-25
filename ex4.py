@@ -3,8 +3,8 @@ import network
 import matplotlib.pyplot as plt
 from scipy import stats
 
-L = 4000  # size of simulated networks
-num = 1000  # number of tested probabilities
+L = 2000  # size of simulated networks
+num = 300  # number of tested probabilities
 p_c = 0.592   # see ex 2
 
 p_arr = np.linspace(0, p_c, num)    # array of simulated probabilities
@@ -24,7 +24,7 @@ for p in p_arr:
     dp = abs(p - p_c)
 
     # exclude percolating systems (condition p < p_c) and special cases
-    if dp > 0 and 0 < S < p_c * L * L and not net.is_perculating() :
+    if dp > 0 and 0 < S < p_c * L * L and not net.is_percolating() :
         ln_S.append(np.log(S))
         ln_dp.append(np.log(dp))
 
@@ -43,4 +43,4 @@ plt.legend()
 plt.grid()
 plt.xlabel('ln(|$p-p_c$|)')
 plt.ylabel('ln($S$)')
-plt.savefig('testex4-6')
+plt.savefig('testex4-7')
