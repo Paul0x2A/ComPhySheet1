@@ -5,8 +5,13 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 
+#from numba import jit, int32, uint32, float32, bool
+#from numba.experimental import jitclass
+
 cmap = ListedColormap([[34, 34, 34], [224, 224, 224]])
 
+# jitclass annotation to tell numba to compile this class
+#@jitclass([('height', int32), ('width', int32), ('probability', float32), ('analysed', bool), ('fixed', bool), ('network', bool[:, :]), ('labeled_network', uint32[:, :]), ('N', int32[:])])
 class Network:
 
     # if save is true, plots will be exported. Not useful for jupyter
@@ -185,3 +190,17 @@ class Network:
         return dict(zip(*np.unique(np.where(self.N > 0,  self.N, np.zeros(len(self.N))), return_counts=True)))
 
 
+#@jit(Network.class_type.instance_type(int32, float32))
+def create(L, p):
+    n = Network(L, L, p)
+    n.hoshen_kopelman()
+    return n
+
+#@jit(Network.class_type.instance_type(int32, float32))
+def create_percolating(L, p):
+    n = Network(L, L, p)
+    n.hoshen_kopelman()
+    while not n.is_percolating():
+        n = Network(L, L, p)
+        n.hoshen_kopelman()
+    return n
