@@ -1,27 +1,15 @@
-import random
-from netrc import netrc
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 
-from numba import int32, uint32, float32, bool
-from numba.experimental import jitclass
+#from numba import jit, int32, uint32, float32, bool
+#from numba.experimental import jitclass
 
 cmap = ListedColormap([[34, 34, 34], [224, 224, 224]])
 
 # jitclass annotation to tell numba to compile this class
-@jitclass()
+#@jitclass([('height', int32), ('width', int32), ('probability', float32), ('analysed', bool), ('fixed', bool), ('network', bool[:, :]), ('labeled_network', uint32[:, :]), ('N', int32[:])])
 class Network:
-
-    # declare class member type, this is required for numba
-    height: int32
-    width: int32
-    probability: float32
-    analysed: bool
-    fixed: bool
-    network: bool[:,:] # 2D bool array
-    labeled_network: uint32[:,:] # 2D uint32 array
-    N: int32[:] # 1D int32 array
 
     # if save is true, plots will be exported. Not useful for jupyter
     def __init__(self, height, width, probability):
@@ -42,7 +30,7 @@ class Network:
 
     # does not fix labels in the network!
     def __resolve_label(self, conflicted_label):
-
+        # TODO: make method more efficient
         r = conflicted_label
         m = self.N[conflicted_label]
         if m < 0:
@@ -114,46 +102,6 @@ class Network:
             self.labeled_network[row][col] = l
         return l
 
-
-    # calculates the mean radius of gyration over all clusters of size s
-    def r_s_squared(self, s):
-
-        # for clusters of size 0 or 1 return 0
-        if s <= 1.0:
-            return 0
-
-        self.fix_labels()
-        labels = np.where(self.N == s)[0]
-
-        # check existence of sufficient labels
-        if len(labels) == 0:
-            return 0
-
-        r_squared = 0
-
-        # loop over all clusters of size s
-        for label in labels:
-
-            n = np.copy(self.labeled_network)   # copy to not modify this network
-            n[n != label] = 0                   # set all wich are not the cluster to 0
-            n = n[~np.all(n == 0, axis=1)]      # delete columns with 0
-            n = n[:, ~np.all(n == 0, axis=0)]   # delete rows with 0
-
-            # loop over all coordinate-combinations
-            for i in range(len(n)):
-                for j in range(len(n[i])):
-                    if n[i][j] != 0:
-                        for k in range(len(n)):
-                            for l in range(len(n[i])):
-                                if n[k][l] != 0:
-                                    r_squared += ((i - k)**2 + (j - l)**2)
-
-        r_squared /= (2 * s * s)    # factor 2 takes care of redundant term in the sum
-        r_squared /= len(labels)    # normalize by the number of investigated clusters
-        return r_squared
-
-
-
     # fixes all labels in the network
     def fix_labels(self):
         if not self.analysed: self.hoshen_kopelman()
@@ -223,6 +171,10 @@ class Network:
                         label = resolved_label_left if resolved_label_left < resolved_label_above else resolved_label_above
                         other_label = resolved_label_left if resolved_label_left > resolved_label_above else resolved_label_above
 
+                        #labeled_row[col-1] = resolved_label_left
+                        #self.labeled_network[row-1][col] = resolved_label_above
+                        #self.labeled_network[row-2][col-1] = label
+                        #self.labeled_network[row-1][col-2] = label
                         self.labeled_network[row-1][col-1] = label
                         self.N[label] += 1
                         self.N[label] += self.N[other_label]
@@ -232,32 +184,20 @@ class Network:
         # end row loop                    
 
     def cluster_sizes(self):
-        return dict(zip(*np.unique(np.where(self.N > 0,  self.N, np.zeros(len(self.N))), return_counts=True)))
+        return dict(zip(*np.unique(np.where(self.N > 0, self.N, np.zeros(len(self.N))), return_counts=True)))
 
-    # calculates the average cluster size of the analyzed network
-    def average_cluster_size(self):
 
-        if not self.analysed: self.hoshen_kopelman()    # check that network is analyzed
-        first_moment = 0
-        second_moment = 0
-        cluster_sizes = self.cluster_sizes()
-        for s in cluster_sizes:
-            n_s = s * cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
-            first_moment += s * n_s
-            second_moment += (s ** 2) * n_s
+#@jit(Network.class_type.instance_type(int32, float32))
+def create(L, p):
+    n = Network(L, L, p)
+    n.hoshen_kopelman()
+    return n
 
-        return 0 if first_moment == 0 else second_moment / first_moment
-
-    # calculates the correlation length of the analyzed network
-    def correlation_length(self):
-        if not self.analysed: self.hoshen_kopelman()    # check that network is analyzed
-        avg_square_distance = 0
-        second_moment = 0
-        cluster_sizes = self.cluster_sizes()
-        for s in cluster_sizes:
-            n_s = s * cluster_sizes[s] / (self.width * self.height)     # probability that a random tile belongs to a cluster of size s
-            avg_square_distance += 2 * self.r_s_squared(s) * n_s * (s ** 2)
-            second_moment += (s ** 2) * n_s
-
-        return 0 if second_moment == 0 else np.sqrt(avg_square_distance / second_moment)
-
+#@jit(Network.class_type.instance_type(int32, float32))
+def create_percolating(L, p):
+    n = Network(L, L, p)
+    n.hoshen_kopelman()
+    while not n.is_percolating():
+        n = Network(L, L, p)
+        n.hoshen_kopelman()
+    return n
