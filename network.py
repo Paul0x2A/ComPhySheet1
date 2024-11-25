@@ -1,6 +1,3 @@
-import random
-from netrc import netrc
-
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
@@ -187,7 +184,7 @@ class Network:
         # end row loop                    
 
     def cluster_sizes(self):
-        return dict(zip(*np.unique(np.where(self.N > 0,  self.N, np.zeros(len(self.N))), return_counts=True)))
+        return dict(zip(*np.unique(np.where(self.N > 0, self.N, np.zeros(len(self.N))), return_counts=True)))
 
 
 #@jit(Network.class_type.instance_type(int32, float32))
